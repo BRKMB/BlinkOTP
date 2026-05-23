@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlinkOTP — Test playground</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        background: #0a0a0c;
+        color: #f4f4f5;
+      }
+      body {
+        max-width: 520px;
+        margin: 48px auto;
+        padding: 0 20px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      p {
+        color: #a1a1aa;
+        line-height: 1.5;
+      }
+      form {
+        margin: 32px 0;
+        padding: 24px;
+        border: 1px solid #27272a;
+        border-radius: 16px;
+        background: #141418;
+      }
+      label {
+        display: block;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        color: #a1a1aa;
+      }
+      input {
+        font-size: 1.25rem;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid #3f3f46;
+        background: #0a0a0c;
+        color: #fff;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .split {
+        display: flex;
+        gap: 8px;
+      }
+      .split input {
+        width: 48px;
+        text-align: center;
+        padding: 12px 0;
+      }
+      button[type='submit'] {
+        margin-top: 16px;
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        background: #5b8cff;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .ok {
+        color: #22c55e;
+        font-size: 0.9rem;
+        min-height: 1.2em;
+      }
+      code {
+        background: #27272a;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>BlinkOTP playground</h1>
+    <p>
+      Use this page to test detection and autofill without signing up on real sites.
+      Send yourself a test email first (subject: <code>Your verification code</code>,
+      body: <code>Your code is 847291</code>), then reload this tab.
+    </p>
+
+    <form id="single-form">
+      <label for="single">Single field (autocomplete=one-time-code)</label>
+      <input
+        id="single"
+        name="otp"
+        type="text"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        maxlength="8"
+        placeholder="000000"
+      />
+      <button type="submit">Verify</button>
+      <p class="ok" id="single-result"></p>
+    </form>
+
+    <form id="split-form">
+      <label>Split boxes (6 digits)</label>
+      <div class="split" id="split-boxes">
+        <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 1" />
+        <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 2" />
+        <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 3" />
+        <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 4" />
+        <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 5" />
+        <input type="text" maxlength="1" inputmode="numeric" aria-label="Digit 6" />
+      </div>
+      <button type="submit">Continue</button>
+      <p class="ok" id="split-result"></p>
+    </form>
+
+    <form id="hint-form">
+      <label for="hint">Placeholder hint field</label>
+      <input
+        id="hint"
+        name="verification_code"
+        type="number"
+        placeholder="Enter security code"
+        maxlength="6"
+      />
+      <button type="submit">Confirm</button>
+      <p class="ok" id="hint-result"></p>
+    </form>
+
+    <script>
+      for (const form of document.querySelectorAll('form')) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const out = form.querySelector('.ok');
+          const single = form.querySelector('#single');
+          const boxes = [...form.querySelectorAll('.split input')];
+          let value = single?.value ?? boxes.map((b) => b.value).join('') ?? form.querySelector('input')?.value;
+          out.textContent = value ? `Submitted: ${value}` : 'Empty';
+        });
+      }
+    </script>
+  </body>
+</html>

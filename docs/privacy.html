@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BlinkOTP Privacy Policy</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #0a0a0c;
+        --text: #f4f4f5;
+        --muted: #a1a1aa;
+        --accent: #8b5cf6;
+        --border: rgba(167, 139, 250, 0.22);
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #fff;
+          --text: #111118;
+          --muted: #5b6170;
+          --border: rgba(99, 102, 241, 0.2);
+        }
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.65;
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 40px 20px 64px;
+      }
+      h1 {
+        font-size: 1.6rem;
+        letter-spacing: -0.02em;
+      }
+      h2 {
+        font-size: 1.05rem;
+        margin-top: 1.75rem;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="meta"><a href="index.html">BlinkOTP</a> · Privacy Policy</p>
+      <h1>Privacy Policy</h1>
+      <p class="meta"><strong>Last updated:</strong> May 23, 2026</p>
+
+      <p>
+        BlinkOTP (&quot;the extension&quot;) is designed so that <strong>your verification codes and
+        email access tokens never leave your device</strong> except to communicate directly with
+        Google Gmail over HTTPS.
+      </p>
+
+      <h2>What we collect</h2>
+      <p>
+        <strong>Nothing on our servers</strong> — BlinkOTP does not operate backend servers and does
+        not receive, store, or process your personal data centrally.
+      </p>
+      <p>Data processed <strong>locally in your browser</strong> includes:</p>
+      <ul>
+        <li>OAuth access tokens for connected Gmail accounts (encrypted in <code>chrome.storage.local</code>)</li>
+        <li>Up to five recent OTP codes in local history (encrypted, auto-deleted after 24 hours)</li>
+        <li>Extension settings (theme, toggles, connected account metadata)</li>
+      </ul>
+
+      <h2>What we do not do</h2>
+      <ul>
+        <li>No analytics, telemetry, fingerprinting, or advertising</li>
+        <li>No sale or sharing of personal data with third parties</li>
+        <li>No cloud sync of OTPs or email content</li>
+        <li>No remote logging of page content or form fields</li>
+      </ul>
+
+      <h2>Email access</h2>
+      <p>
+        With your explicit consent during setup, BlinkOTP requests <strong>read-only</strong> access
+        to your Gmail mailbox via Gmail API (<code>gmail.readonly</code>).
+      </p>
+      <p>
+        The extension queries only recent messages matching verification-related keywords and
+        extracts OTP codes locally. It does not send email bodies to any third-party service
+        controlled by the extension author.
+      </p>
+
+      <h2>Legal basis (GDPR)</h2>
+      <p>
+        For users in the EEA/UK, processing is based on <strong>your consent</strong> (connecting
+        Gmail) and <strong>legitimate interest</strong> in providing the autofill functionality you
+        requested. You may withdraw consent by disconnecting Gmail or uninstalling the extension.
+      </p>
+
+      <h2>Data retention</h2>
+      <ul>
+        <li>OTP history: maximum 5 entries, deleted after 24 hours</li>
+        <li>Tokens: removed when you disconnect or uninstall</li>
+        <li>Incognito: isolated (<code>split</code> mode); no sharing with normal profile storage</li>
+      </ul>
+
+      <h2>Security</h2>
+      <p>
+        Sensitive values are encrypted at rest using AES-GCM (Web Cryptography API). Keys are managed
+        by the browser extension platform.
+      </p>
+
+      <h2>Children&apos;s privacy</h2>
+      <p>BlinkOTP is not directed at children under 16.</p>
+
+      <h2>Changes</h2>
+      <p>
+        Material changes will be reflected in extension release notes and an updated &quot;Last
+        updated&quot; date on this page.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Privacy questions: open an issue on the project repository (link on the
+        <a href="index.html">BlinkOTP home page</a>) or contact the developer via the Chrome Web
+        Store listing support channel once published.
+      </p>
+    </main>
+  </body>
+</html>
