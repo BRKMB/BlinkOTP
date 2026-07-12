@@ -5,6 +5,18 @@
 import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
 
+function parseEnvFile(text) {
+  const vars = {};
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq < 0) continue;
+    vars[trimmed.slice(0, eq)] = trimmed.slice(eq + 1);
+  }
+  return vars;
+}
+
 for (const name of readdirSync('.')) {
   if (name.startsWith('client_secret') && name.endsWith('.json')) {
     console.error(`[build:store] Remove ${name} from the project root first.`);
@@ -12,12 +24,10 @@ for (const name of readdirSync('.')) {
   }
 }
 
+let localEnv = {};
 try {
-  const local = readFileSync('.env.local', 'utf8');
-  const secretLine = local
-    .split('\n')
-    .find((l) => l.startsWith('VITE_GOOGLE_WEB_CLIENT_SECRET=') && l.split('=')[1]?.trim());
-  if (secretLine) {
+  localEnv = parseEnvFile(readFileSync('.env.local', 'utf8'));
+  if (localEnv.VITE_GOOGLE_WEB_CLIENT_SECRET?.trim()) {
     console.warn(
       '[build:store] .env.local contains VITE_GOOGLE_WEB_CLIENT_SECRET — overriding to empty for this build.',
     );
@@ -27,7 +37,11 @@ try {
 }
 
 console.log('[build:store] Building without client secret…');
-const env = { ...process.env, VITE_GOOGLE_WEB_CLIENT_SECRET: '' };
+const env = {
+  ...process.env,
+  ...localEnv,
+  VITE_GOOGLE_WEB_CLIENT_SECRET: '',
+};
 const result = spawnSync('npm', ['run', 'build'], { stdio: 'inherit', shell: true, env });
 if (result.status !== 0) process.exit(result.status ?? 1);
 

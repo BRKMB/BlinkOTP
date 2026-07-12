@@ -1,16 +1,18 @@
 import { defineManifest } from '@crxjs/vite-plugin';
+import { loadEnv } from 'vite';
 import {
   DEFAULT_GOOGLE_CHROME_CLIENT_ID,
   GMAIL_SCOPE,
 } from './src/shared/google-oauth-ids';
 
+const env = loadEnv('production', process.cwd(), '');
 const GOOGLE_CHROME_CLIENT_ID =
-  process.env.VITE_GOOGLE_CLIENT_ID ?? DEFAULT_GOOGLE_CHROME_CLIENT_ID;
+  env.VITE_GOOGLE_CLIENT_ID ?? DEFAULT_GOOGLE_CHROME_CLIENT_ID;
 
 export default defineManifest({
   manifest_version: 3,
   name: 'BlinkOTP',
-  version: '1.0.12',
+  version: '1.0.13',
   description:
     'Instant, automatic OTP autofill from your email — private, free, and fully automatic.',
   permissions: ['storage', 'identity', 'identity.email', 'alarms', 'clipboardWrite', 'activeTab', 'tabs'],

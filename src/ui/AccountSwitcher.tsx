@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { isTokenExpired } from '../shared/account-auth';
 import type { EmailAccount } from '../shared/types';
-import { IconCheck, IconChevronDown, IconPlus } from './icons';
+import { IconChevronDown, IconPlus } from './icons';
 
 interface Props {
   accounts: EmailAccount[];
@@ -40,6 +40,9 @@ export function AccountSwitcher({
 
   const selected = accounts.find((a) => a.id === selectedId) ?? accounts[0] ?? null;
   const multipleAccounts = accounts.length > 1;
+  const otherAccounts = selected
+    ? accounts.filter((a) => a.id !== selected.id)
+    : accounts;
 
   useEffect(() => {
     if (!open) return;
@@ -83,10 +86,9 @@ export function AccountSwitcher({
       </button>
 
       {open && (
-        <>
+        <div className="blink-account-switcher__menu" role="menu" aria-label={menuLabel}>
           {multipleAccounts &&
-            accounts.map((a) => {
-              const active = a.id === selected.id;
+            otherAccounts.map((a) => {
               const expired = needsRenewal(a);
               return (
                 <button
@@ -97,7 +99,7 @@ export function AccountSwitcher({
                     onSelect(a.id);
                     setOpen(false);
                   }}
-                  className={`blink-account-card${active ? ' blink-account-card--selected' : ''}`}
+                  className="blink-account-card"
                 >
                   <span className="blink-account-card__avatar" title={a.email}>
                     {accountInitial(a.email)}
@@ -110,15 +112,13 @@ export function AccountSwitcher({
                       </span>
                     )}
                   </span>
-                  {active && (
-                    <IconCheck size={16} className="shrink-0 text-[var(--blink-cyan)]" />
-                  )}
                 </button>
               );
             })}
 
           <button
             type="button"
+            role="menuitem"
             className="blink-account-card"
             disabled={adding}
             onClick={() => {
@@ -142,7 +142,7 @@ export function AccountSwitcher({
               </span>
             </span>
           </button>
-        </>
+        </div>
       )}
     </div>
   );

@@ -163,7 +163,7 @@ export function PopupApp() {
               <StatusPill tone="danger">Reconnect Gmail to continue</StatusPill>
             )}
 
-            <div>
+            <div className="blink-popup__accounts">
               <SectionHeading statusDot={needsReconnect ? 'danger' : 'ok'}>
                 Connected accounts
               </SectionHeading>

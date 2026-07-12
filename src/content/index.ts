@@ -97,6 +97,9 @@ async function fetchAndShow(force = false, manual = false): Promise<void> {
       startPolling();
       return;
     }
+    if (res.error.includes('Gmail access lost')) {
+      stopPolling();
+    }
     pushOtpToUi({ type: 'OTP_FETCH_FAILED', error: res.error });
     return;
   }

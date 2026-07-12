@@ -1,12 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { sanitizeOtpCode } from '../../shared/otp-extractor';
 import { secretMask } from '../../shared/storage';
 import { isOtpEntryReady, type OtpFieldGroup } from '../detector';
 import { pageToastDurationMs } from '../../shared/page-toast-settings';
 import type { OtpResult, UserSettings } from '../../shared/types';
+import {
+  isPageAlertDismissed,
+  markPageAlertDismissed,
+  pageAlertKey,
+} from '../page-alert-dismiss';
 import { subscribeOtpUi } from '../content-ui-bridge';
 import { Bubble } from './Bubble';
 import { Notification } from './Notification';
+import { PageAlert } from './PageAlert';
 
 const TOAST_LEFT: React.CSSProperties = {
   position: 'fixed',
@@ -33,7 +39,8 @@ export function ContentApp({ group, showBubble, onFill, onFetch, onUseLatestCode
   const [otp, setOtp] = useState<OtpResult | null>(null);
   const [popupOpen, setPopupOpen] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [pageAlert, setPageAlert] = useState<{ message: string; key: string } | null>(null);
+  const pageAlertShownRef = useRef<string | null>(null);
   const [fillHint, setFillHint] = useState<string | null>(null);
   const [bubbleState, setBubbleState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [waitingForNew, setWaitingForNew] = useState(false);
@@ -57,16 +64,37 @@ export function ContentApp({ group, showBubble, onFill, onFetch, onUseLatestCode
     return () => chrome.storage.onChanged.removeListener(onChange);
   }, []);
 
+  const dismissPageAlert = useCallback(async () => {
+    const key = pageAlert?.key;
+    if (key) {
+      await markPageAlertDismissed(key);
+      pageAlertShownRef.current = key;
+    }
+    setPageAlert(null);
+  }, [pageAlert]);
+
+  const showFetchErrorAlert = useCallback(async (error: string) => {
+    const key = pageAlertKey(error);
+    if (pageAlertShownRef.current === key) return;
+    if (await isPageAlertDismissed(key)) return;
+    pageAlertShownRef.current = key;
+    setPopupOpen(false);
+    setWaitingForNew(false);
+    setOtp(null);
+    setPageAlert({ message: error, key });
+    setBubbleState('error');
+  }, []);
+
   const dismiss = useCallback(() => {
     setOtp(null);
     setPopupOpen(false);
-    setFetchError(null);
+    setPageAlert(null);
     setFillHint(null);
     setWaitingForNew(false);
   }, []);
 
   const applyOtpReady = useCallback((msg: { payload?: OtpResult | null; error?: string }) => {
-    setFetchError(null);
+    setPageAlert(null);
     setWaitingForNew(false);
     setFillHint(null);
     setPopupOpen(true);
@@ -88,7 +116,6 @@ export function ContentApp({ group, showBubble, onFill, onFetch, onUseLatestCode
     const onUi = subscribeOtpUi((msg) => {
       if (msg.type === 'OTP_POPUP_OPEN') {
         setPopupOpen(true);
-        setFetchError(null);
         setBubbleState('loading');
         setWaitingForNew(Boolean(msg.waiting));
         return;
@@ -99,22 +126,17 @@ export function ContentApp({ group, showBubble, onFill, onFetch, onUseLatestCode
       }
       if (msg.type === 'OTP_FETCH_STARTED') {
         setBubbleState('loading');
-        setFetchError(null);
         if (typeof msg.waiting === 'boolean') setWaitingForNew(msg.waiting);
         return;
       }
       if (msg.type === 'OTP_WAITING_NEW') {
         setPopupOpen(true);
         setWaitingForNew(true);
-        setFetchError(null);
         setBubbleState('loading');
         return;
       }
       if (msg.type === 'OTP_FETCH_FAILED') {
-        setWaitingForNew(false);
-        setFetchError(msg.error ?? 'Could not fetch code');
-        setBubbleState('error');
-        setPopupOpen(true);
+        void showFetchErrorAlert(msg.error ?? 'Could not fetch code');
         return;
       }
       if (msg.type === 'OTP_READY') {
@@ -130,14 +152,10 @@ export function ContentApp({ group, showBubble, onFill, onFetch, onUseLatestCode
         ) {
           setPopupOpen(true);
           setWaitingForNew(true);
-          setFetchError(null);
           setBubbleState('loading');
           return;
         }
-        setWaitingForNew(false);
-        setFetchError(msg.error ?? 'Could not fetch code');
-        setBubbleState('error');
-        setPopupOpen(true);
+        void showFetchErrorAlert(msg.error ?? 'Could not fetch code');
         return;
       }
       if (msg.type === 'OTP_READY') {
@@ -150,7 +168,7 @@ export function ContentApp({ group, showBubble, onFill, onFetch, onUseLatestCode
       onUi();
       chrome.runtime.onMessage.removeListener(onRuntime);
     };
-  }, [dismiss, applyOtpReady]);
+  }, [dismiss, applyOtpReady, showFetchErrorAlert]);
 
   const copyCode = useCallback(async (code: string) => {
     await navigator.clipboard.writeText(sanitizeOtpCode(code));
@@ -181,7 +199,7 @@ export function ContentApp({ group, showBubble, onFill, onFetch, onUseLatestCode
 
   const rect = group?.elements[0]?.getBoundingClientRect();
   const showNotification = popupOpen || Boolean(otp);
-  const notificationLoading = popupOpen && !otp && !fetchError;
+  const notificationLoading = popupOpen && !otp && !pageAlert;
 
   return (
     <>
@@ -191,7 +209,6 @@ export function ContentApp({ group, showBubble, onFill, onFetch, onUseLatestCode
           state={bubbleState}
           onClick={() => {
             setPopupOpen(true);
-            setFetchError(null);
             if (otp) {
               setBubbleState('ready');
               return;
@@ -201,17 +218,19 @@ export function ContentApp({ group, showBubble, onFill, onFetch, onUseLatestCode
           }}
         />
       )}
-      {fetchError && !otp && popupOpen && (
-        <div className="blink-glass-toast" style={{ ...TOAST_LEFT, color: 'var(--blink-danger, #f87171)' }}>
-          {fetchError}
-        </div>
+      {pageAlert && (
+        <PageAlert
+          message={pageAlert.message}
+          dismissAfterMs={Math.min(toastDismissMs, 12_000)}
+          onDismiss={() => void dismissPageAlert()}
+        />
       )}
       {fillHint && (
         <div className="blink-glass-toast" style={{ ...TOAST_LEFT, color: 'var(--blink-success, #34d399)' }}>
           {fillHint}
         </div>
       )}
-      {showNotification && !fetchError && (
+      {showNotification && !pageAlert && (
         <Notification
           otp={otp}
           loading={notificationLoading}

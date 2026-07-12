@@ -117,7 +117,14 @@ async function broadcastOtpToTab(tabId: number, otp: OtpResult, host: string): P
   }
 }
 
+const lastTabFetchError = new Map<number, { error: string; at: number }>();
+const TAB_FETCH_ERROR_COOLDOWN_MS = 60_000;
+
 async function broadcastFetchError(tabId: number, error: string): Promise<void> {
+  const prev = lastTabFetchError.get(tabId);
+  const now = Date.now();
+  if (prev?.error === error && now - prev.at < TAB_FETCH_ERROR_COOLDOWN_MS) return;
+  lastTabFetchError.set(tabId, { error, at: now });
   try {
     await chrome.tabs.sendMessage(tabId, { type: 'OTP_FETCH_FAILED', error });
   } catch {

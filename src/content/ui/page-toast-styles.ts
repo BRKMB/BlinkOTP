@@ -446,6 +446,38 @@ const PAGE_TOAST_RULES = `
   .blink-toast-success {
     color: var(--blink-success);
   }
+  .blink-page-alert {
+    border-color: rgba(248, 113, 113, 0.35);
+    box-shadow:
+      0 0 0 1px rgba(248, 113, 113, 0.12) inset,
+      0 12px 36px rgba(0, 0, 0, 0.35);
+  }
+  .blink-page-alert__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .blink-page-alert__brand {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--blink-muted);
+  }
+  .blink-page-alert__close {
+    margin: -2px -2px 0 0;
+  }
+  .blink-page-alert__message {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--blink-danger);
+  }
+  .blink-page-alert__progress {
+    margin-top: 8px;
+  }
 `;
 
 export const PAGE_TOAST_FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');`;

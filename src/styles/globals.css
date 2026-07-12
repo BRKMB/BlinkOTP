@@ -205,7 +205,10 @@ html.blink-popup body {
   min-width: var(--blink-popup-width);
   min-height: 0;
   height: auto;
+  max-height: 600px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background-color: var(--blink-bg);
   background-image:
     radial-gradient(ellipse 100% 80% at 100% 0%, var(--blink-logo-teal), transparent 50%),
@@ -213,8 +216,19 @@ html.blink-popup body {
     radial-gradient(ellipse 75% 60% at 8% 12%, var(--blink-logo-blue), transparent 46%);
 }
 
+html.blink-popup #root {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 600px;
+  overflow: hidden;
+}
+
 .blink-popup.blink-shell {
   min-height: auto;
+  max-height: 600px;
+  overflow: hidden;
   background-image:
     radial-gradient(ellipse 100% 80% at 100% 0%, var(--blink-logo-teal), transparent 50%),
     radial-gradient(ellipse 90% 75% at 0% 100%, var(--blink-logo-magenta), transparent 52%),
@@ -235,12 +249,17 @@ html.blink-popup body {
 
 .blink-popup {
   width: var(--blink-popup-width);
+  max-height: 600px;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
   color: var(--blink-text);
+  overflow: hidden;
 }
 
 .blink-popup__header {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -249,11 +268,18 @@ html.blink-popup body {
 }
 
 .blink-popup__main {
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: var(--blink-space-4);
   padding: 0 var(--blink-space-5) var(--blink-space-3);
-  overflow: visible;
+  overflow: hidden;
+}
+
+.blink-popup__accounts {
+  flex-shrink: 0;
+  min-height: 0;
 }
 
 .blink-popup__stack-tight {
@@ -433,6 +459,7 @@ html.blink-popup body {
 }
 
 .blink-popup__footer {
+  flex-shrink: 0;
   padding: var(--blink-space-3) var(--blink-space-5) var(--blink-space-4);
   border-top: 1px solid var(--blink-border);
   overflow: visible;
@@ -687,6 +714,31 @@ html.blink-popup body {
   display: flex;
   flex-direction: column;
   gap: var(--blink-space-2);
+}
+
+/* Scroll only the account list when many mailboxes — not the whole popup */
+.blink-account-switcher__menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--blink-space-2);
+  max-height: 196px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.blink-account-switcher__menu::-webkit-scrollbar {
+  width: 5px;
+}
+
+.blink-account-switcher__menu::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: rgba(167, 139, 250, 0.35);
+}
+
+.blink-account-switcher__menu::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 /* In-flow panel — no overlap; Apple frosted glass (blur + fallback) */
